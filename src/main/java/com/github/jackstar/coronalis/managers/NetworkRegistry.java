@@ -3,6 +3,7 @@ package com.github.jackstar.coronalis.managers;
 import com.github.jackstar.coronalis.Coronalis;
 import com.github.jackstar.coronalis.implementation.data.CoronalisNetwork;
 import com.github.jackstar.coronalis.implementation.data.TelescopeState;
+import com.github.jackstar.coronalis.managers.SoundManager;
 import com.github.drakescraft_labs.slimefun4.legacy.api.BlockStorage;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -35,11 +36,19 @@ public class NetworkRegistry {
     /** Redes indexadas por ID de red (= ubicación de la consola). */
     private final Map<String, CoronalisNetwork> networks = new ConcurrentHashMap<>();
 
+    private double globalScienceTime = 0.0;
+
     /** Límite BFS de bloques a explorar por validación de cable. */
     private static final int BFS_LIMIT = 900;
 
     /** Radio de detección de redes rivales (bloques). */
     public static final int RIVAL_DETECT_RADIUS = 200;
+
+    private static final Set<String> MODULE_IDS = Set.of(
+        "CORONALIS_SIGNAL_AMPLIFIER",
+        "CORONALIS_DATA_BANK",
+        "CORONALIS_AUTO_CALIBRATOR"
+    );
 
     // ── Gestión de redes ─────────────────────────────────────────────────────
 
@@ -160,6 +169,7 @@ public class NetworkRegistry {
             // Limpiar listas dinámicas antes de recalcular enlaces.
             net.clearTelescopes();
             net.clearEnergyNodes();
+            net.clearModules();
 
             // Escanear telescopios en radio 50 bloques
             List<Location> candidates = findTelescopesInRadius(consoleLoc, 50);
@@ -179,11 +189,19 @@ public class NetworkRegistry {
             for (Location loc : energyNodes) {
                 net.addEnergyNode(loc);
             }
-            net.setMaxSignalUnits(1000 + (net.getEnergyNodeCount() * 500));
+            for (String moduleId : MODULE_IDS) {
+                for (Location loc : findConnectedModules(consoleLoc, moduleId)) {
+                    net.addModule(moduleId, loc);
+                }
+            }
+            net.setMaxSignalUnits(1000 + (net.getEnergyNodeCount() * 500) + (net.getDataBankCount() * 750));
 
             Coronalis.log("[NetworkRegistry] Red " + net.getId()
                 + " reconstruida: " + added + " telescopio(s), "
-                + net.getEnergyNodeCount() + " núcleo(s) SU.");
+                + net.getEnergyNodeCount() + " núcleo(s) SU, "
+                + net.getSignalAmplifierCount() + " amplificador(es), "
+                + net.getDataBankCount() + " banco(s), "
+                + net.getAutoCalibratorCount() + " calibrador(es).");
 
         } catch (Exception e) {
             Coronalis.instance().getLogger().log(Level.WARNING,
@@ -203,11 +221,72 @@ public class NetworkRegistry {
             try {
                 network.generateSU();
                 network.drainStandbySU();
+                tickAutoCalibrators(network);
+                updateScienceTelemetry(network);
             } catch (Exception e) {
                 Coronalis.instance().getLogger().log(Level.WARNING,
                     "[NetworkRegistry] Error al alimentar red " + network.getId(), e);
             }
         }
+    }
+
+    private void updateScienceTelemetry(@Nonnull CoronalisNetwork network) {
+        globalScienceTime += 0.1;
+        Location consoleLoc = network.getConsoleLoc();
+        double currentAz = getConsoleDouble(consoleLoc, "current_az");
+        double currentEl = getConsoleDouble(consoleLoc, "current_el");
+        double targetAz = getConsoleDouble(consoleLoc, "target_az");
+        double targetEl = getConsoleDouble(consoleLoc, "target_el");
+        for (TelescopeState state : network.getTelescopes().values()) {
+            state.updateTelemetry(consoleLoc, currentAz, currentEl, targetAz, targetEl, globalScienceTime);
+        }
+    }
+
+    @Nonnull
+    private List<Location> findConnectedModules(@Nonnull Location consoleLoc, @Nonnull String moduleId) {
+        List<Location> candidates = findBlocksInRadius(consoleLoc, 50, moduleId);
+        List<Location> connected = new ArrayList<>();
+        for (Location candidate : candidates) {
+            if (isConnectedByCable(candidate, consoleLoc)) {
+                connected.add(candidate);
+            }
+        }
+        return connected;
+    }
+
+    private void tickAutoCalibrators(@Nonnull CoronalisNetwork network) {
+        int calibrators = network.getAutoCalibratorCount();
+        if (calibrators <= 0 || network.getTelescopeCount() == 0) return;
+
+        int steps = 0;
+        for (int i = 0; i < calibrators; i++) {
+            if (!network.drainSU(CoronalisNetwork.SU_COST_AUTO_CALIBRATE)) break;
+            if (advanceOneCalibration(network)) {
+                steps++;
+            } else {
+                break;
+            }
+        }
+        if (steps > 0) {
+            Location loc = network.getConsoleLoc();
+            Coronalis.log("[Coronalis/AutoCalib] Red " + network.getId()
+                + " calibró " + steps + " parámetro(s). SU="
+                + network.getSignalUnits() + "/" + network.getMaxSignalUnits());
+            Coronalis.instance().getSoundManager().playAt(loc, SoundManager.CoronalisSound.CALIBRATE);
+        }
+    }
+
+    private boolean advanceOneCalibration(@Nonnull CoronalisNetwork network) {
+        for (TelescopeState state : network.getTelescopes().values()) {
+            for (TelescopeState.CalibParam param : TelescopeState.CalibParam.values()) {
+                if (state.get(param) < 100) {
+                    state.advance(param, 10);
+                    state.incrementCalibCount();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     // ── Detección de redes rivales ───────────────────────────────────────────
@@ -318,5 +397,15 @@ public class NetworkRegistry {
     private static String getConsoleTarget(@Nonnull Location consoleLoc) {
         String t = BlockStorage.getLocationInfo(consoleLoc, "selected_target");
         return t != null ? t : "";
+    }
+
+    private static double getConsoleDouble(@Nonnull Location consoleLoc, @Nonnull String key) {
+        String raw = BlockStorage.getLocationInfo(consoleLoc, key);
+        if (raw == null) return 0.0;
+        try {
+            return Double.parseDouble(raw);
+        } catch (NumberFormatException ignored) {
+            return 0.0;
+        }
     }
 }

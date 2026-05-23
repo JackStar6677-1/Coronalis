@@ -34,6 +34,7 @@ public class ItemSetup {
         Research interferometry = new Research(new NamespacedKey(plugin, "interferometry"), 88622, "Interferometría VLBI", 34);
         Research deepSkyOps = new Research(new NamespacedKey(plugin, "deep_sky_ops"), 88623, "Operaciones de Cielo Profundo", 44);
         Research arrayInfrastructure = new Research(new NamespacedKey(plugin, "array_infrastructure"), 88624, "Infraestructura de Array", 18);
+        Research arrayAutomation = new Research(new NamespacedKey(plugin, "array_automation"), 88625, "Automatización de Observatorio", 36);
 
         /* 1. Componentes Básicos */
         SlimefunItem antenna = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_ANTENNA_DISH, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
@@ -84,6 +85,30 @@ public class ItemSetup {
         signalCore.setResearch(arrayInfrastructure);
         signalCore.register(plugin);
 
+        ArrayNetworkBlock amplifier = new ArrayNetworkBlock(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_SIGNAL_AMPLIFIER, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.SYNTHETIC_SAPPHIRE, Items.CORONALIS_RECEIVER, SlimefunItems.SYNTHETIC_SAPPHIRE,
+                SlimefunItems.COPPER_WIRE, SlimefunItems.ADVANCED_CIRCUIT_BOARD, SlimefunItems.COPPER_WIRE,
+                SlimefunItems.REINFORCED_PLATE, Items.CORONALIS_COAXIAL_CABLE, SlimefunItems.REINFORCED_PLATE
+        });
+        amplifier.setResearch(arrayAutomation);
+        amplifier.register(plugin);
+
+        ArrayNetworkBlock dataBank = new ArrayNetworkBlock(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_DATA_BANK, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.SYNTHETIC_DIAMOND, Items.CORONALIS_DATA_CELL, SlimefunItems.SYNTHETIC_DIAMOND,
+                SlimefunItems.BASIC_CIRCUIT_BOARD, SlimefunItems.GPS_TRANSMITTER_2, SlimefunItems.BASIC_CIRCUIT_BOARD,
+                SlimefunItems.REINFORCED_PLATE, Items.CORONALIS_COAXIAL_CABLE, SlimefunItems.REINFORCED_PLATE
+        });
+        dataBank.setResearch(arrayAutomation);
+        dataBank.register(plugin);
+
+        ArrayNetworkBlock autoCalibrator = new ArrayNetworkBlock(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_AUTO_CALIBRATOR, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.ELECTRIC_MOTOR, Items.CORONALIS_PID_CONTROLLER, SlimefunItems.ELECTRIC_MOTOR,
+                SlimefunItems.ADVANCED_CIRCUIT_BOARD, SlimefunItems.GPS_TRANSMITTER_3, SlimefunItems.ADVANCED_CIRCUIT_BOARD,
+                SlimefunItems.ENERGY_CONNECTOR, Items.CORONALIS_SIGNAL_CORE, SlimefunItems.ENERGY_CONNECTOR
+        });
+        autoCalibrator.setResearch(arrayAutomation);
+        autoCalibrator.register(plugin);
+
         /* 2. Bloques Interactivos */
         RadioTelescope telescope = new RadioTelescope(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_RADIO_TELESCOPE, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
                 Items.CORONALIS_ANTENNA_DISH, Items.CORONALIS_RECEIVER, Items.CORONALIS_ANTENNA_DISH,
@@ -116,6 +141,9 @@ public class ItemSetup {
 
         arrayInfrastructure.addItems(cable, signalCore);
         arrayInfrastructure.register();
+
+        arrayAutomation.addItems(amplifier, dataBank, autoCalibrator);
+        arrayAutomation.register();
 
         deepSkyOps.addItems(console, record);
         deepSkyOps.register();

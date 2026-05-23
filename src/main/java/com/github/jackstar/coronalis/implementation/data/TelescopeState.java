@@ -40,6 +40,20 @@ public final class TelescopeState {
     /** Número de calibraciones totales realizadas (estadística). */
     private int calibCount = 0;
 
+    // ── Telemetría científica estilo AstroControlSim ────────────────────────
+    private double azError = 0.0;
+    private double elError = 0.0;
+    private double signalAmplitude = 0.0;
+    private double signalPhase = 0.0;
+    private double motorTemp = 25.0;
+    private double motorCurrent = 0.0;
+    private String runtimeState = "IDLE";
+    private double pidKp = PidProfile.DEFAULT.getKp();
+    private double pidKi = PidProfile.DEFAULT.getKi();
+    private double pidKd = PidProfile.DEFAULT.getKd();
+    private int resetCount = 0;
+    private int faultCount = 0;
+
     public TelescopeState(@Nonnull Location loc) {
         this.loc = loc.clone();
     }
@@ -132,6 +146,84 @@ public final class TelescopeState {
 
     @Nonnull public Location getLoc() { return loc.clone(); }
 
+    public double getAzError() { return azError; }
+    public double getElError() { return elError; }
+    public double getSignalAmplitude() { return signalAmplitude; }
+    public double getSignalPhase() { return signalPhase; }
+    public double getMotorTemp() { return motorTemp; }
+    public double getMotorCurrent() { return motorCurrent; }
+    @Nonnull public String getRuntimeState() { return runtimeState; }
+    public double getPidKp() { return pidKp; }
+    public double getPidKi() { return pidKi; }
+    public double getPidKd() { return pidKd; }
+    public int getResetCount() { return resetCount; }
+    public int getFaultCount() { return faultCount; }
+
+    public void tunePid(double kp, double ki, double kd) {
+        pidKp = clampDouble(kp, 0.05, 5.0);
+        pidKi = clampDouble(ki, 0.0, 1.0);
+        pidKd = clampDouble(kd, 0.0, 2.0);
+    }
+
+    public void tunePid(@Nonnull PidProfile profile) {
+        tunePid(profile.getKp(), profile.getKi(), profile.getKd());
+    }
+
+    public void resetRuntime() {
+        needsFullRecal = false;
+        runtimeState = "IDLE";
+        motorCurrent = 0.5;
+        motorTemp = Math.max(25.0, motorTemp - 8.0);
+        resetCount++;
+    }
+
+    public void injectFault(@Nonnull String reason) {
+        needsFullRecal = true;
+        runtimeState = "FAULT";
+        motorCurrent = 0.0;
+        motorTemp = Math.min(95.0, motorTemp + 10.0);
+        faultCount++;
+    }
+
+    /**
+     * Actualiza una telemetría simplificada inspirada en AstroControlSim:
+     * error de apuntado, señal compleja, fase geométrica y sensores de salud.
+     */
+    public void updateTelemetry(@Nonnull Location consoleLoc,
+                                double currentAz, double currentEl,
+                                double targetAz, double targetEl,
+                                double windPhase) {
+        azError = targetAz - currentAz;
+        elError = targetEl - currentEl;
+        double pointingError = Math.sqrt((azError * azError) + (elError * elError));
+        double calibration = getCalibrationFactor();
+
+        runtimeState = needsFullRecal ? "FAULT"
+            : pointingError < 0.1 ? "TRACKING"
+            : pointingError > 0.1 ? "SLEWING"
+            : "IDLE";
+
+        double dx = loc.getBlockX() - consoleLoc.getBlockX();
+        double dz = loc.getBlockZ() - consoleLoc.getBlockZ();
+        double azRad = Math.toRadians(currentAz);
+        double elRad = Math.toRadians(currentEl);
+        double sx = Math.cos(elRad) * Math.sin(azRad);
+        double sy = Math.cos(elRad) * Math.cos(azRad);
+
+        double lambda = 0.001;
+        double waveK = (2.0 * Math.PI) / lambda;
+        signalPhase = positiveModulo(waveK * ((dx * sx) + (dz * sy)), 2.0 * Math.PI);
+        signalAmplitude = Math.max(0.0, calibration * (1.0 - Math.min(0.75, pointingError / 180.0)));
+
+        double windLoad = Math.abs(Math.sin(windPhase + (dx * 0.13) + (dz * 0.07)));
+        double pidAggression = Math.max(0.25, pidKp + pidKd - pidKi);
+        motorCurrent = "SLEWING".equals(runtimeState)
+            ? 2.0 + ((pointingError / 30.0) * pidAggression) + windLoad
+            : 0.5 + (windLoad * 0.5);
+        motorTemp = Math.max(20.0, Math.min(95.0,
+            25.0 + (motorCurrent * 3.0) + ((1.0 - calibration) * 12.0)));
+    }
+
     // ── Bar util ─────────────────────────────────────────────────────────────
 
     /**
@@ -146,6 +238,15 @@ public final class TelescopeState {
     }
 
     private static int clamp(int v) { return Math.max(0, Math.min(100, v)); }
+
+    private static double clampDouble(double v, double min, double max) {
+        return Math.max(min, Math.min(max, v));
+    }
+
+    private static double positiveModulo(double value, double modulo) {
+        double result = value % modulo;
+        return result < 0 ? result + modulo : result;
+    }
 
     @Override
     public String toString() {

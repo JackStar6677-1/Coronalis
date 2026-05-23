@@ -5,6 +5,7 @@ import com.github.jackstar.coronalis.discovery.DiscoveryService;
 import com.github.jackstar.coronalis.implementation.Items;
 import com.github.jackstar.coronalis.implementation.data.CelestialTarget;
 import com.github.jackstar.coronalis.implementation.data.CoronalisNetwork;
+import com.github.jackstar.coronalis.implementation.data.ObservationProgram;
 import com.github.jackstar.coronalis.implementation.data.TelescopeState;
 import com.github.jackstar.coronalis.managers.AccessManager;
 import com.github.jackstar.coronalis.managers.CosmicEventManager;
@@ -335,7 +336,8 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
 
         // 1. Si no está alineado: avanzar PID
         if (dist >= ALIGNED_THRESHOLD) {
-            if (!network.drainSU(CoronalisNetwork.SU_COST_SLEW)) {
+            int slewCost = network.getEffectiveSlewCost();
+            if (!network.drainSU(slewCost)) {
                 Coronalis.instance().getSoundManager().playEnergyLow(loc);
                 updateMenuVisuals(menu, loc);
                 return;
@@ -357,7 +359,8 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
         if (sfIn == null || !sfIn.getId().equals("CORONALIS_DATA_CELL")) return;
 
         int scopes = getInt(BlockStorage.getLocationInfo(loc, "connected_telescopes"), 0);
-        if (!network.drainSU(CoronalisNetwork.SU_COST_CORRELATE)) {
+        int correlateCost = network.getEffectiveCorrelateCost();
+        if (!network.drainSU(correlateCost)) {
             Coronalis.instance().getSoundManager().playEnergyLow(loc);
             updateMenuVisuals(menu, loc);
             return;
@@ -434,8 +437,9 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             return;
         }
 
-        if (!network.drainSU(CoronalisNetwork.SU_COST_SLEW)) {
-            warnNoEnergy(player, loc, network, CoronalisNetwork.SU_COST_SLEW);
+        int slewCost = network.getEffectiveSlewCost();
+        if (!network.drainSU(slewCost)) {
+            warnNoEnergy(player, loc, network, slewCost);
             updateMenuVisuals(menu, loc);
             return;
         }
@@ -543,8 +547,9 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             return;
         }
 
-        if (!network.drainSU(CoronalisNetwork.SU_COST_CORRELATE)) {
-            warnNoEnergy(player, loc, network, CoronalisNetwork.SU_COST_CORRELATE);
+        int correlateCost = network.getEffectiveCorrelateCost();
+        if (!network.drainSU(correlateCost)) {
+            warnNoEnergy(player, loc, network, correlateCost);
             updateMenuVisuals(menu, loc);
             return;
         }
@@ -739,16 +744,24 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7Modo: " + (autoOn ? "§aAUTOMÁTICO" : "§7MANUAL"),
             "§7Redes cercanas: §d" + rivals.size() + (interfering > 0 ? " §c(" + interfering + " interfiriendo)" : ""),
             "",
-            "§7Velocidad correlación manual: §b+" + (MANUAL_BASE + scopes * MANUAL_PER_SCOPE) + "% / clic"
+            "§7Velocidad correlación manual: §b+" + (MANUAL_BASE + scopes * MANUAL_PER_SCOPE) + "% / clic",
+            "",
+            scopes == 0 ? "§cFalta: conecta radiotelescopios con cable coaxial." : "§aCableado de antenas detectado.",
+            "§8Ayuda: /coronalis guide cableado"
         ));
 
         // Panel: Objetivo
         CelestialTarget target = "Ninguno".equals(targetName) ? null : CelestialTarget.byName(targetName);
+        ObservationProgram program = Coronalis.instance().getObservationProgramManager().getActiveProgram(loc);
         menu.replaceExistingItem(PANEL_TARGET, new CustomItemStack(Material.COMPASS,
             "§d🎯 Objetivo Fijado",
             "§7Cuerpo: §6§l" + targetName,
             target != null ? target.tier.label : "§7—",
-            "§7Az obj: §e" + round1(tarAz) + "°  §7El obj: §e" + round1(tarEl) + "°"
+            "§7Az obj: §e" + round1(tarAz) + "°  §7El obj: §e" + round1(tarEl) + "°",
+            "§7Programa: " + (program == null ? "§8Ninguno" : "§a" + program.getDisplayName()),
+            "§8Tip: selecciona objetivos de la fila inferior.",
+            "§8Misiones: /coronalis programs",
+            "§8Ayuda: /coronalis guide inicio"
         ));
 
         // Panel: Telemetría
@@ -760,9 +773,17 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
                 + " §8(" + Math.round(network.getSUPercent()) + "%)",
             "§7Buffer eléctrico: §e" + getExternalCharge(loc) + "§7/§e" + ENERGY_CAPACITY_J + " J",
             "§7Núcleos SU: §a" + network.getEnergyNodeCount(),
+            "§7Amplificadores: §d" + network.getSignalAmplifierCount()
+                + " §8(costes " + network.getEffectiveSlewCost() + "/" + network.getEffectiveCorrelateCost() + " SU)",
+            "§7Bancos de datos: §b" + network.getDataBankCount(),
+            "§7Auto-calibradores: §a" + network.getAutoCalibratorCount(),
+            "§7Baselines UV: §e" + network.getBaselineCount(),
             "",
             "§7Error de apuntado: §c" + error + "°",
-            "§7Estado: " + stateStr
+            "§7Estado: " + stateStr,
+            "",
+            network.getSignalUnits() <= 0 ? "§cFalta energía: conecta núcleos SU o EnergyNet." : "§aEnergía disponible.",
+            "§8Ayuda: /coronalis guide energia"
         ));
 
         // Panel: PID
@@ -771,7 +792,13 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7Kp: §a0.45  §7Ki: §a0.02  §7Kd: §a0.15",
             "§7Paso máx Az: §e" + MAX_STEP_AZ + "°  §7El: §e" + MAX_STEP_EL + "°",
             "",
-            "§7Salida PID: §b" + round1(error * KP) + " rad/s²"
+            "§7Salida PID: §b" + round1(error * KP) + " rad/s²",
+            "§7Temp media motor: §c" + round1(network.getAverageMotorTemp()) + " °C",
+            "§7Corriente media: §e" + round1(network.getAverageMotorCurrent()) + " A",
+            "§7Flujo total simulado: §b" + round1(network.getTotalSignalAmplitude()) + " Jy",
+            "",
+            "§7Qué hace: mueve antenas hacia el objetivo.",
+            "§8Ayuda: /coronalis guide calibracion"
         ));
 
         // Panel: Falla
@@ -783,7 +810,8 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             hasFault ? "§7Usa §eReparar §7para resolver." : "§7Sin anomalías.",
             "",
             "§7Prob. falla: §e" + (Coronalis.instance().getCosmicEventManager().isFaultChanceBoosted()
-                ? "§cALTA (Tormenta)" : "NORMAL")
+                ? "§cALTA (Tormenta)" : "NORMAL"),
+            "§8Ayuda: /coronalis guide fallos"
         ));
 
         // Panel: Evento Cósmico ← NUEVO
@@ -823,17 +851,23 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7Ajusta Azimut, Elevación, Frecuencia,",
             "§7Fase y Ganancia de cada radiotelescopio.",
             "§7Costo: §b" + CoronalisNetwork.SU_COST_CALIBRATE + " SU §7por paso.",
+            "§7Auto-calibración: §a" + network.getAutoCalibratorCount()
+                + " módulo(s), §b" + CoronalisNetwork.SU_COST_AUTO_CALIBRATE + " SU §7por paso.",
             "",
             "§7Progreso global: §e" + Math.round(network.getAverageCalibrationFactor() * 100.0) + "%",
-            "§dClic para calibrar el siguiente parámetro."
+            "§dClic para calibrar el siguiente parámetro.",
+            "§8Si quieres automatizar: conecta Calibrador VLBI."
         ));
 
         menu.replaceExistingItem(BUTTON_INVITE, new CustomItemStack(Material.WRITABLE_BOOK,
             "§aInvitar Operador",
             "§7Solo el propietario puede invitar jugadores.",
             "§7El nombre se escribe por chat y se intercepta.",
+            "§7Sirve para compartir esta instalación",
+            "§7sin abrirla globalmente al servidor.",
             "",
-            "§dClic para abrir flujo de invitación."
+            "§dClic para abrir flujo de invitación.",
+            "§8Ayuda: /coronalis guide acceso"
         ));
 
         menu.replaceExistingItem(BUTTON_PASSWORD, new CustomItemStack(Material.ENDER_EYE,
@@ -842,7 +876,8 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7tras intentar abrir una consola protegida.",
             "§7Estado: " + (Coronalis.instance().getAccessManager().hasPassword(loc) ? "§aConfigurada" : "§cSin contraseña"),
             "",
-            "§dClic para cambiarla o quitarla."
+            "§dClic para cambiarla o quitarla.",
+            "§8Ayuda: /coronalis guide acceso"
         ));
 
         // Botón: Auto ← NUEVO
@@ -853,7 +888,8 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7automáticamente sin interacción manual.",
             "§7Velocidad auto: §b" + (AUTO_BASE + scopes * AUTO_PER_SCOPE) + "% / 2s",
             "",
-            "§dClic para " + (autoOn ? "§cdesactivar" : "§aactivar") + "§d."
+            "§dClic para " + (autoOn ? "§cdesactivar" : "§aactivar") + "§d.",
+            "§8Automatiza con cargo/importadores y Celda de Datos."
         ));
 
         // Botón: Correlación
@@ -866,7 +902,10 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
             "§7" + bar,
             "§7Requiere: §eCelda de Datos Celestes §7en entrada.",
             "",
-            "§dClic para correlacionar."
+            scopes == 0 ? "§cFalta telescopios cableados." :
+                network.getCalibratedCount() < scopes ? "§cFalta calibración completa." : "§aArray listo para correlación.",
+            "§dClic para correlacionar.",
+            "§8Ayuda: /coronalis guide automatizacion"
         ));
     }
 

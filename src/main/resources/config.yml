@@ -24,6 +24,16 @@ discovery-xp:
   target_exoplaneta_kepler-186f:     60
   target_agujero_negro_m87star:      70
 
+  # XP por completar programas científicos del observatorio.
+  program_orion_molecular_map:       140
+  program_crab_synchrotron_watch:    180
+  program_andromeda_hi_survey:       220
+  program_pulsar_timing_run:         300
+  program_sag_a_phase_lock:          380
+  program_kepler_thermal_signature:  520
+  program_m87_event_horizon_frame:   700
+  program_full_array_first_light:    1000
+
 # ── Eventos Cósmicos ──────────────────────────────────────────────────────────
 cosmic-events:
   # Probabilidad de que se dispare un evento por ciclo de 5 min (1 en N)

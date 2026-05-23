@@ -31,7 +31,10 @@ public class ArrayNetworkBlock extends SlimefunItem implements Listener {
 
     private static final Set<String> NETWORK_BLOCK_IDS = Set.of(
         "CORONALIS_COAXIAL_CABLE",
-        "CORONALIS_SIGNAL_CORE"
+        "CORONALIS_SIGNAL_CORE",
+        "CORONALIS_SIGNAL_AMPLIFIER",
+        "CORONALIS_DATA_BANK",
+        "CORONALIS_AUTO_CALIBRATOR"
     );
 
     public ArrayNetworkBlock(@Nonnull ItemGroup itemGroup,

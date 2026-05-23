@@ -52,6 +52,10 @@ public final class Items {
             "&7Celda de almacenamiento de telemetría y datos.",
             "&7Insértala en la consola de control para",
             "&7registrar nuevos descubrimientos espaciales.",
+            "&7Automatizable: entra por cargo/importadores",
+            "&7al slot de entrada de la consola.",
+            "",
+            "&eGuía: &f/coronalis guide automatizacion",
             "",
             "&9&oCoronalis Array Command"
     );
@@ -63,6 +67,10 @@ public final class Items {
             "&7Bloque conductor para enlazar consolas,",
             "&7núcleos SU y radiotelescopios Coronalis.",
             "&7La red valida continuidad bloque a bloque.",
+            "&7Conecta también amplificadores, bancos",
+            "&7y calibradores automáticos.",
+            "",
+            "&eGuía: &f/coronalis guide cableado",
             "",
             "&5&oCoronalis Array Infrastructure"
     );
@@ -74,8 +82,53 @@ public final class Items {
             "&7Genera Signal Units para alimentar",
             "&7movimiento PID, calibración y correlación.",
             "&7Debe conectarse a la consola con cable coaxial.",
+            "&7También puedes alimentar la consola con",
+            "&7red eléctrica Slimefun compatible.",
+            "",
+            "&eGuía: &f/coronalis guide energia",
             "",
             "&9&oCoronalis Array Power"
+    );
+
+    public static final SlimefunItemStack CORONALIS_SIGNAL_AMPLIFIER = new SlimefunItemStack(
+            "CORONALIS_SIGNAL_AMPLIFIER",
+            Material.SCULK_SENSOR,
+            "&dAmplificador Criogénico",
+            "&7Módulo cableado que aumenta la sensibilidad",
+            "&7del array y reduce el coste de correlación.",
+            "&7Útil para redes grandes y automatizadas.",
+            "&7Conexión: cable coaxial hacia la consola.",
+            "",
+            "&eGuía: &f/coronalis guide automatizacion",
+            "",
+            "&5&oCoronalis Array Infrastructure"
+    );
+
+    public static final SlimefunItemStack CORONALIS_DATA_BANK = new SlimefunItemStack(
+            "CORONALIS_DATA_BANK",
+            Material.CHISELED_BOOKSHELF,
+            "&bBanco de Datos Astronómicos",
+            "&7Módulo cableado que amplía el buffer",
+            "&7de SU y estabiliza operaciones automáticas.",
+            "&7Conexión: cable coaxial hacia la consola.",
+            "",
+            "&eGuía: &f/coronalis guide energia",
+            "",
+            "&9&oCoronalis Array Storage"
+    );
+
+    public static final SlimefunItemStack CORONALIS_AUTO_CALIBRATOR = new SlimefunItemStack(
+            "CORONALIS_AUTO_CALIBRATOR",
+            Material.CALIBRATED_SCULK_SENSOR,
+            "&aCalibrador Automático VLBI",
+            "&7Módulo cableado que calibra lentamente",
+            "&7los radiotelescopios usando SU del array.",
+            "&7Conexión: cable coaxial hacia la consola.",
+            "&7Consume SU por cada paso automático.",
+            "",
+            "&eGuía: &f/coronalis guide calibracion",
+            "",
+            "&2&oCoronalis Array Automation"
     );
 
     /* Bloques Funcionales */
@@ -87,6 +140,9 @@ public final class Items {
             "&7Debe conectarse por cable coaxial",
             "&7a una consola de control.",
             "&7Máximo operativo: 50 por red.",
+            "&7Debe calibrarse antes de correlacionar.",
+            "",
+            "&eGuía: &f/coronalis guide inicio",
             "",
             "&5&oCoronalis Array Labs"
     );
@@ -98,6 +154,10 @@ public final class Items {
             "&7Permite seleccionar objetivos cósmicos,",
             "&7alinear las antenas con el bucle PID",
             "&7y correlacionar señales electromagnéticas.",
+            "&7Acepta energía Slimefun y celdas por cargo.",
+            "&7Usa /coronalis status para diagnosticarla.",
+            "",
+            "&eGuía: &f/coronalis help",
             "",
             "&9&oCoronalis Array Command"
     );

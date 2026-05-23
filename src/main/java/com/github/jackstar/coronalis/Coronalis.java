@@ -17,6 +17,8 @@ import com.github.jackstar.coronalis.implementation.setup.ItemSetup;
 import com.github.jackstar.coronalis.managers.AccessManager;
 import com.github.jackstar.coronalis.managers.CosmicEventManager;
 import com.github.jackstar.coronalis.managers.NetworkRegistry;
+import com.github.jackstar.coronalis.managers.ObservationProgramManager;
+import com.github.jackstar.coronalis.managers.ObservatoryOperations;
 import com.github.jackstar.coronalis.managers.SoundManager;
 
 /**
@@ -30,6 +32,8 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
     private AccessManager accessManager;
     private NetworkRegistry networkRegistry;
     private SoundManager soundManager;
+    private ObservatoryOperations observatoryOperations;
+    private ObservationProgramManager observationProgramManager;
 
     @Override
     public void onEnable() {
@@ -45,6 +49,8 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
         accessManager = new AccessManager();
         networkRegistry = new NetworkRegistry();
         soundManager = new SoundManager();
+        observatoryOperations = new ObservatoryOperations(this);
+        observationProgramManager = new ObservationProgramManager(this);
 
         log("§d==================================================");
         log("§5[Coronalis] §dSintonizando el array de fase...");
@@ -52,7 +58,9 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
         getServer().getPluginManager().registerEvents(new DiscoveryListener(discoveryService), this);
         accessManager.register();
         if (getCommand("coronalis") != null) {
-            getCommand("coronalis").setExecutor(new CoronalisCommand());
+            CoronalisCommand command = new CoronalisCommand();
+            getCommand("coronalis").setExecutor(command);
+            getCommand("coronalis").setTabCompleter(command);
         }
         loadItems();
         cosmicEventManager.start();
@@ -71,6 +79,9 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
         if (soundManager != null) {
             soundManager.stopAll();
         }
+        if (observatoryOperations != null) {
+            observatoryOperations.stopAll();
+        }
         log("§5[Coronalis] §cDeshabilitado.");
         instance = null;
         discoveryService = null;
@@ -78,6 +89,8 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
         accessManager = null;
         networkRegistry = null;
         soundManager = null;
+        observatoryOperations = null;
+        observationProgramManager = null;
     }
 
     @Nonnull
@@ -103,6 +116,16 @@ public class Coronalis extends JavaPlugin implements SlimefunAddon {
     @Nonnull
     public SoundManager getSoundManager() {
         return soundManager;
+    }
+
+    @Nonnull
+    public ObservatoryOperations getObservatoryOperations() {
+        return observatoryOperations;
+    }
+
+    @Nonnull
+    public ObservationProgramManager getObservationProgramManager() {
+        return observationProgramManager;
     }
 
     @Override

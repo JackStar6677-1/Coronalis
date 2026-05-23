@@ -36,6 +36,9 @@ public final class CoronalisNetwork {
     /** Núcleos de energía SU conectados por cable a la consola. */
     private final Set<Location> energyNodes = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    /** Módulos auxiliares cableados por tipo de bloque Slimefun. */
+    private final Map<String, Set<Location>> modules = new ConcurrentHashMap<>();
+
     /** Energía actual en Signal Units (SU). */
     private volatile int signalUnits = 0;
 
@@ -51,6 +54,8 @@ public final class CoronalisNetwork {
     public static final int SU_COST_CORRELATE = 50;
     /** Energía necesaria por paso de calibración individual. */
     public static final int SU_COST_CALIBRATE = 20;
+    /** Energía consumida por un calibrador automático por tick de red. */
+    public static final int SU_COST_AUTO_CALIBRATE = 35;
     /** Consumo de standby por telescopio cada tick (2s). */
     public static final int SU_DRAIN_PER_SCOPE = 2;
     /** Energía generada por cada núcleo SU en cada tick de red (4s). */
@@ -122,6 +127,37 @@ public final class CoronalisNetwork {
         return total / telescopes.size();
     }
 
+    public double getAverageMotorTemp() {
+        if (telescopes.isEmpty()) return 0.0;
+        double total = 0.0;
+        for (TelescopeState state : telescopes.values()) {
+            total += state.getMotorTemp();
+        }
+        return total / telescopes.size();
+    }
+
+    public double getAverageMotorCurrent() {
+        if (telescopes.isEmpty()) return 0.0;
+        double total = 0.0;
+        for (TelescopeState state : telescopes.values()) {
+            total += state.getMotorCurrent();
+        }
+        return total / telescopes.size();
+    }
+
+    public double getTotalSignalAmplitude() {
+        double total = 0.0;
+        for (TelescopeState state : telescopes.values()) {
+            total += state.getSignalAmplitude();
+        }
+        return total;
+    }
+
+    public int getBaselineCount() {
+        int count = telescopes.size();
+        return count < 2 ? 0 : (count * (count - 1)) / 2;
+    }
+
     @Nullable
     public TelescopeState getTelescopeState(@Nonnull Location loc) {
         return telescopes.get(loc);
@@ -137,12 +173,37 @@ public final class CoronalisNetwork {
         energyNodes.clear();
     }
 
+    public void clearModules() {
+        modules.clear();
+    }
+
     public void addEnergyNode(@Nonnull Location loc) {
         energyNodes.add(loc.clone());
     }
 
     public int getEnergyNodeCount() {
         return energyNodes.size();
+    }
+
+    public void addModule(@Nonnull String id, @Nonnull Location loc) {
+        modules.computeIfAbsent(id, key -> Collections.newSetFromMap(new ConcurrentHashMap<>())).add(loc.clone());
+    }
+
+    public int getModuleCount(@Nonnull String id) {
+        Set<Location> locs = modules.get(id);
+        return locs == null ? 0 : locs.size();
+    }
+
+    public int getSignalAmplifierCount() {
+        return getModuleCount("CORONALIS_SIGNAL_AMPLIFIER");
+    }
+
+    public int getDataBankCount() {
+        return getModuleCount("CORONALIS_DATA_BANK");
+    }
+
+    public int getAutoCalibratorCount() {
+        return getModuleCount("CORONALIS_AUTO_CALIBRATOR");
     }
 
     @Nonnull
@@ -173,6 +234,16 @@ public final class CoronalisNetwork {
 
     public synchronized void generateSU() {
         addSU(energyNodes.size() * SU_GENERATION_PER_CORE);
+    }
+
+    public int getEffectiveCorrelateCost() {
+        int reduction = Math.min(30, getSignalAmplifierCount() * 6);
+        return Math.max(20, SU_COST_CORRELATE - reduction);
+    }
+
+    public int getEffectiveSlewCost() {
+        int reduction = Math.min(6, getSignalAmplifierCount() * 2);
+        return Math.max(4, SU_COST_SLEW - reduction);
     }
 
     public boolean hasSU(int amount) {
