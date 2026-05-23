@@ -100,7 +100,7 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
             ));
         }
         if (args.length == 2 && ("guide".equalsIgnoreCase(args[0]) || "guia".equalsIgnoreCase(args[0]))) {
-            return filter(args[1], List.of("inicio", "energia", "cableado", "calibracion", "automatizacion", "acceso", "fallos", "ciencia"));
+            return filter(args[1], List.of("inicio", "energia", "cableado", "calibracion", "automatizacion", "programas", "acceso", "fallos", "ciencia", "operaciones"));
         }
         if (args.length == 2 && ("tune".equalsIgnoreCase(args[0]) || "pid".equalsIgnoreCase(args[0]))) {
             return filter(args[1], List.of("default", "aggressive", "damped", "sluggish", "precision", "storm_safe", "custom"));
@@ -183,6 +183,12 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§7Activa §aModo Automático§7 en la GUI para alinear y correlacionar con celdas insertadas.");
                 sender.sendMessage("§7Usa amplificadores para bajar coste SU y bancos para ampliar buffer.");
             }
+            case "programas", "programs", "misiones" -> {
+                sender.sendMessage("§7Los programas científicos son misiones persistidas en la consola cercana.");
+                sender.sendMessage("§7Piden objetivo, telescopios, baselines, calibración, señal y a veces módulos.");
+                sender.sendMessage("§7Usa §d/coronalis programs §7para listar y §d/coronalis program <id> §7para activar.");
+                sender.sendMessage("§7Cuando todo esté listo: §d/coronalis program complete§7.");
+            }
             case "acceso" -> {
                 sender.sendMessage("§7La primera persona que abre una consola la reclama como owner.");
                 sender.sendMessage("§7El owner puede invitar operadores o configurar contraseña desde la GUI.");
@@ -213,7 +219,7 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§8- §d/coronalis maintenance repair §7AI z-score + reset de fallos.");
             }
             default -> {
-                sender.sendMessage("§7Tema no reconocido. Usa: §einicio, energia, cableado, calibracion, automatizacion, acceso, fallos, ciencia, operaciones§7.");
+                sender.sendMessage("§7Tema no reconocido. Usa: §einicio, energia, cableado, calibracion, automatizacion, programas, acceso, fallos, ciencia, operaciones§7.");
             }
         }
     }

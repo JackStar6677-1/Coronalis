@@ -1,65 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="Coronalis social preview">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-labelledby="title desc">
+  <title id="title">Coronalis social preview</title>
+  <desc id="desc">Vista social de Coronalis con observatorio de radio, red cableada, energía y programas científicos.</desc>
   <defs>
-    <radialGradient id="sbg" cx="50%" cy="40%" r="90%">
-      <stop offset="0%" stop-color="#2a1848"/>
-      <stop offset="55%" stop-color="#120a24"/>
-      <stop offset="100%" stop-color="#05030d"/>
+    <radialGradient id="bg" cx="64%" cy="18%" r="92%">
+      <stop offset="0%" stop-color="#164e63"/>
+      <stop offset="36%" stop-color="#111c34"/>
+      <stop offset="72%" stop-color="#070b17"/>
+      <stop offset="100%" stop-color="#02030a"/>
     </radialGradient>
-    <linearGradient id="sgold" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#f6e7a8"/>
-      <stop offset="100%" stop-color="#c9a227"/>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#fff7bf"/>
+      <stop offset="48%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#92400e"/>
     </linearGradient>
-    <linearGradient id="svio" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0%" stop-color="#7c3aed"/>
-      <stop offset="100%" stop-color="#e879f9"/>
+    <linearGradient id="cyan" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#7dd3fc"/>
     </linearGradient>
-    <clipPath id="sclip"><circle cx="220" cy="340" r="150"/></clipPath>
+    <linearGradient id="beam" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0%" stop-color="#22d3ee" stop-opacity=".42"/>
+      <stop offset="60%" stop-color="#f59e0b" stop-opacity=".18"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-35%" y="-35%" width="170%" height="170%">
+      <feGaussianBlur stdDeviation="5" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
     <style>
-      .st{animation:tw 3s ease-in-out infinite}
-      .sw{animation:sr 4s linear infinite;transform-origin:220px 340px}
-      .pu{animation:pu 3s ease-out infinite}
-      .wv{stroke-dasharray:8 12;animation:ds 7s linear infinite}
-      .sh{animation:dr 20s linear infinite}
-      @keyframes tw{0%,100%{opacity:.4}50%{opacity:1}}
-      @keyframes sr{to{transform:rotate(360deg)}}
-      @keyframes pu{0%{r:10;opacity:.7}100%{r:200;opacity:0}}
-      @keyframes ds{to{stroke-dashoffset:-40}}
-      @keyframes dr{0%{transform:translateX(0)}100%{transform:translateX(60px)}}
+      .kicker{font:800 25px 'Segoe UI',Arial,sans-serif;letter-spacing:8px;fill:#38bdf8}
+      .title{font:900 104px 'Segoe UI',Arial,sans-serif;letter-spacing:-4px;fill:url(#gold);filter:url(#glow)}
+      .sub{font:500 35px 'Segoe UI',Arial,sans-serif;fill:#dbeafe}
+      .line{font:600 23px Consolas,monospace;fill:#86efac}
+      .dim{font:500 20px Consolas,monospace;fill:#94a3b8}
+      .tw{animation:tw 3s ease-in-out infinite}
+      .dash{stroke-dasharray:10 14;animation:dash 8s linear infinite}
+      .ring{animation:ring 4s ease-out infinite}
+      .sweep{animation:sweep 5s linear infinite;transform-origin:225px 380px}
+      @keyframes tw{0%,100%{opacity:.35}50%{opacity:1}}
+      @keyframes dash{to{stroke-dashoffset:-96}}
+      @keyframes ring{0%{r:12;opacity:.85}100%{r:230;opacity:0}}
+      @keyframes sweep{to{transform:rotate(360deg)}}
     </style>
   </defs>
-  <rect width="1280" height="640" fill="url(#sbg)"/>
-  <g fill="#fff" opacity=".65">
-    <circle cx="100" cy="80" r="1.5" class="st"/>
-    <circle cx="1100" cy="120" r="2" fill="#f6e7a8" class="st"/>
-    <circle cx="600" cy="60" r="1" class="st"/>
-    <circle cx="950" cy="500" r="1.2" class="st"/>
+
+  <rect width="1280" height="640" fill="url(#bg)"/>
+  <path d="M0 500 C180 430 330 520 510 454 C708 382 860 450 1040 360 C1142 310 1210 315 1280 286 L1280 640 L0 640 Z" fill="#06111f"/>
+  <path d="M0 552 C220 500 390 560 620 512 C850 464 1040 520 1280 440 L1280 640 L0 640 Z" fill="#030712"/>
+
+  <g opacity=".68">
+    <circle cx="112" cy="86" r="2" fill="#fff" class="tw"/>
+    <circle cx="466" cy="62" r="1.4" fill="#bae6fd" class="tw"/>
+    <circle cx="734" cy="92" r="2.2" fill="#fde68a" class="tw"/>
+    <circle cx="1038" cy="78" r="1.7" fill="#fff" class="tw"/>
+    <circle cx="1186" cy="172" r="1.4" fill="#bae6fd" class="tw"/>
   </g>
-  <circle cx="220" cy="340" r="155" fill="rgba(74,222,128,.08)" stroke="rgba(74,222,128,.35)" stroke-width="2"/>
-  <circle cx="220" cy="340" r="110" fill="none" stroke="rgba(74,222,128,.2)"/>
-  <circle cx="220" cy="340" r="60" fill="none" stroke="rgba(74,222,128,.15)"/>
-  <g clip-path="url(#sclip)"><path class="sw" d="M220 340 L220 190 A150 150 0 0 1 370 340 Z" fill="url(#svio)" opacity=".4"/></g>
-  <circle cx="280" cy="290" r="5" fill="#4ade80" class="st"/>
-  <circle cx="170" cy="380" r="4" fill="#e879f9" class="st"/>
-  <g transform="translate(420 340)">
-    <circle class="pu" cx="0" cy="0" r="10" fill="none" stroke="#e879f9" stroke-width="2"/>
-    <circle class="pu" cx="0" cy="0" r="10" fill="none" stroke="#d4af37" stroke-width="1.5" style="animation-delay:1.2s"/>
+
+  <g stroke="#38bdf8" stroke-opacity=".12">
+    <path d="M515 78 H1212"/>
+    <path d="M515 158 H1212"/>
+    <path d="M515 238 H1212"/>
+    <path d="M515 318 H1212"/>
+    <path d="M600 56 V506"/>
+    <path d="M760 56 V506"/>
+    <path d="M920 56 V506"/>
+    <path d="M1080 56 V506"/>
   </g>
-  <path class="wv" d="M400 480 C600 320,850 360,1200 460" fill="none" stroke="url(#svio)" stroke-width="2.5" opacity=".5"/>
-  <g class="sh" transform="translate(700 180)">
-    <path d="M0 12 L40 0 L46 10 L40 22 L0 12Z" fill="#1a142c" stroke="#e879f9" stroke-width="1.2"/>
-    <circle cx="44" cy="11" r="3" fill="#4ade80"/>
+
+  <circle cx="225" cy="380" r="165" fill="#06251e" fill-opacity=".48" stroke="#22c55e" stroke-opacity=".35" stroke-width="2"/>
+  <circle cx="225" cy="380" r="112" fill="none" stroke="#22c55e" stroke-opacity=".18"/>
+  <circle cx="225" cy="380" r="58" fill="none" stroke="#22c55e" stroke-opacity=".18"/>
+  <path class="sweep" d="M225 380 L225 215 A165 165 0 0 1 390 380 Z" fill="#22c55e" opacity=".18"/>
+  <circle cx="280" cy="320" r="6" fill="#86efac" filter="url(#glow)" class="tw"/>
+  <circle cx="176" cy="434" r="5" fill="#38bdf8" filter="url(#glow)" class="tw"/>
+
+  <g transform="translate(440 380)">
+    <circle class="ring" cx="0" cy="0" r="12" fill="none" stroke="#38bdf8" stroke-width="2"/>
+    <circle class="ring" cx="0" cy="0" r="12" fill="none" stroke="#f59e0b" stroke-width="1.5" style="animation-delay:1.35s"/>
+    <circle class="ring" cx="0" cy="0" r="12" fill="none" stroke="#86efac" stroke-width="1.2" style="animation-delay:2.7s"/>
   </g>
-  <g class="sh" transform="translate(980 420) scale(-1,1)">
-    <path d="M0 10 L36 2 L42 10 L36 18 L0 10Z" fill="#1a142c" stroke="url(#sgold)" stroke-width="1"/>
+
+  <path class="dash" d="M380 492 C570 350 800 390 1190 472" fill="none" stroke="url(#cyan)" stroke-width="3" opacity=".55"/>
+  <path class="dash" d="M392 538 C626 474 760 320 1205 302" fill="none" stroke="url(#gold)" stroke-width="2" opacity=".38" style="animation-duration:10s"/>
+
+  <g transform="translate(1010 260)">
+    <path d="M175 258 L56 30 L6 30 L128 258 Z" fill="url(#beam)"/>
+    <path d="M0 26 Q72 90 144 26 C126 -12 18 -12 0 26 Z" fill="url(#gold)" filter="url(#glow)"/>
+    <path d="M0 26 L72 -28 L144 26" fill="none" stroke="#fde68a" stroke-width="2"/>
+    <path d="M72 26 V105" stroke="#f59e0b" stroke-width="5"/>
+    <circle cx="72" cy="-28" r="8" fill="#38bdf8" filter="url(#glow)"/>
   </g>
-  <g transform="translate(1020 280) scale(1.1)">
-    <path d="M0 20 Q60 65 120 20 C105 -5 15 -5 0 20Z" fill="url(#sgold)"/>
-    <line x1="60" y1="20" x2="60" y2="-18" stroke="url(#sgold)" stroke-width="2"/>
-    <circle cx="60" cy="-18" r="7" fill="#e879f9"/>
+
+  <g transform="translate(70 90)">
+    <text x="0" y="0" class="kicker">CORONALIS ARRAY LABS</text>
+    <text x="0" y="126" class="title">Coronalis</text>
+    <text x="4" y="186" class="sub">Addon Slimefun de radioastronomía operativa</text>
+    <text x="4" y="246" class="line">50 TELESCOPIOS · CABLE NETWORK · ENERGYNET · PROGRAMS</text>
+    <text x="4" y="292" class="dim">Telemetría, calibración, automatización y smoke tests</text>
   </g>
-  <text x="72" y="100" font-family="Segoe UI,Arial" font-size="22" font-weight="700" fill="#e879f9" letter-spacing="6">CORONALIS</text>
-  <text x="68" y="200" font-family="Segoe UI,Arial" font-size="88" font-weight="800" fill="url(#sgold)">Coronalis</text>
-  <text x="72" y="260" font-family="Segoe UI,Arial" font-size="32" fill="#e2e8f0">Addon Slimefun &#183; radioastronomía &#183; XP</text>
-  <text x="72" y="320" font-family="Segoe UI,Arial" font-size="24" fill="#94a3b8">Radar &#183; correlación de fase &#183; cielo profundo</text>
-  <text x="72" y="560" font-family="Consolas,monospace" font-size="20" fill="#4ade80">JackStar6677 &#183; ARRAY ONLINE</text>
+
+  <g transform="translate(820 500)">
+    <rect x="0" y="0" width="330" height="58" rx="14" fill="#050816" fill-opacity=".86" stroke="#38bdf8" stroke-opacity=".35"/>
+    <text x="22" y="36" class="line">ARRAY ONLINE · PHASE LOCK</text>
+  </g>
 </svg>

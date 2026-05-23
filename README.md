@@ -3,100 +3,175 @@
 <h1 align="center">Coronalis</h1>
 
 <p align="center">
-  <strong>Addon Slimefun de radioastronomía, interferometría y descubrimientos con XP</strong><br/>
-  Proyecto original de <a href="https://github.com/JackStar6677-1">JackStar6677</a> para Paper 1.21 — sin vínculo con simuladores de escritorio ni marcas de terceros.
+  <strong>Addon Slimefun de radioastronomía, arrays cableados, telemetría y programas científicos</strong><br/>
+  Un observatorio jugable para Paper 1.21.1 donde la energía, el cableado, la calibración y la señal importan.
 </p>
 
 <p align="center">
-  <a href="https://github.com/JackStar6677-1/Coronalis"><img src="https://img.shields.io/badge/Repositorio-Coronalis-8a2be2?style=for-the-badge" alt="Repo"/></a>
-  <img src="https://img.shields.io/badge/Paper-1.21.1-41c5ff?style=for-the-badge" alt="Paper"/>
-  <img src="https://img.shields.io/badge/Slimefun-6%20Drake-7c3aed?style=for-the-badge" alt="Slimefun"/>
-  <img src="https://img.shields.io/badge/Java-21-orange?style=for-the-badge" alt="Java 21"/>
+  <a href="https://github.com/JackStar6677-1/Coronalis"><img src="https://img.shields.io/badge/Repositorio-Coronalis-0b1026?style=for-the-badge" alt="Repositorio"/></a>
+  <img src="https://img.shields.io/badge/Paper-1.21.1-38bdf8?style=for-the-badge" alt="Paper 1.21.1"/>
+  <img src="https://img.shields.io/badge/Slimefun-6%20Drake-f59e0b?style=for-the-badge" alt="Slimefun"/>
+  <img src="https://img.shields.io/badge/Java-21-22c55e?style=for-the-badge" alt="Java 21"/>
 </p>
 
 ---
 
-## Qué es Coronalis
+## Qué Es
 
-**Coronalis** convierte tu mundo de Minecraft en un observatorio de radio interferométrico: montas antenas, enlazas una consola de correlación, apuntas a objetivos del cielo profundo y ganas **XP de Minecraft** cada vez que catalogas una señal por primera vez.
+**Coronalis** convierte una base Slimefun en un observatorio de radio interferometría. Construyes radiotelescopios, los conectas con cable coaxial, alimentas la consola con energía nativa o EnergyNet, calibras el array, apuntas a objetivos de cielo profundo y completas programas científicos con recompensas de XP.
 
-El nombre sigue la línea de proyectos Jack (**AuroralisStar**, **VoidWhisper**, **StellarDaybook**): compuesto inventado, memorable y sin colisionar con IPs ajenas.
+La filosofía del plugin es que el observatorio sea una máquina real dentro de Minecraft: no basta con colocar bloques cerca. Hay red, carga energética, módulos, mantenimiento, telemetría, automatización y comandos de diagnóstico.
 
-| Concepto | En el juego |
-|----------|-------------|
-| **Corona / fase** | Correlación de señales entre antenas |
-| **Array** | Red de radiotelescopios alrededor de la consola |
-| **Eco de fase** | Ítem de catálogo con datos de un descubrimiento |
-| **Cielo profundo** | Objetivos de dificultad creciente (nebulosas → M87*) |
+| Sistema | Qué aporta |
+|---|---|
+| Array cableado | Hasta 50 radiotelescopios conectados por bloques de cable |
+| Energía dual | SU nativo de Coronalis y puente con Joules de Slimefun EnergyNet |
+| Telemetría | Az/El, fase, amplitud, temperatura, corriente, fallos y PID |
+| Ciencia | Objetivos celestes, eco de fase, baselines UV y programas científicos |
+| Automatización | Entrada/salida compatible con cargo/hoppers/storage addons |
+| Seguridad | Consolas protegibles por propietario, invitados y contraseña |
 
 ---
 
 ## Características
 
-### Infraestructura de observatorio
+### Observatorio Cableado
 
-- **Plato de antena**, **receptor 1 mm**, **controlador PID** y **celda de datos** — componentes de crafteo con lore *Coronalis Array Labs*.
-- **Escucha del Vacío — Antena**: bloque colocable; debe estar a ≤15 bloques de la consola.
-- **Consola de control del observatorio**: GUI de operaciones (objetivos, alineación, correlación).
+- **Máximo de 50 radiotelescopios** por red para mantener rendimiento y balance.
+- La red se reconstruye por conectividad de cable, no por proximidad suelta.
+- Bloques principales:
+  - `CORONALIS_COAXIAL_CABLE`
+  - `CORONALIS_SIGNAL_CORE`
+  - `CORONALIS_SIGNAL_AMPLIFIER`
+  - `CORONALIS_DATA_BANK`
+  - `CORONALIS_AUTO_CALIBRATOR`
+  - `CORONALIS_RADIO_TELESCOPE`
+  - `CORONALIS_CONTROL_CONSOLE`
 
-### Sistema de descubrimientos (XP)
+### Energía y Compatibilidad Slimefun
 
-- Progreso guardado en **PDC** del jugador (persistente entre sesiones).
-- **Primera vez** que correlacionas o analizas un objetivo → más XP; repeticiones → menos.
-- **Eco de fase correlacionada**: clic derecho para analizar y recibir XP (configurable).
-- Bonus al desbloquear investigaciones Slimefun del addon.
+- La consola es `EnergyNetComponent` y consume energía externa.
+- Conversión interna: **4 J = 1 SU**.
+- Buffer eléctrico de consola: **8192 J**.
+- Importación por tick: **512 J/t**.
+- Mantiene el loop nativo de Coronalis con SU, pero acepta redes de energía de otros addons compatibles.
 
-### Objetivos celestes
+### Automatización
 
-| Objetivo | Tier | Antenas mín. |
-|----------|------|--------------|
-| Nebulosa Cabeza de Caballo | Fácil | 10 |
-| Nebulosa del Cangrejo | Intermedio | 11 |
-| Galaxia de Andrómeda | Intermedio | 12 |
-| Púlsar PSR B1919+21 | Difícil | 13 |
-| Sagitario A* | Difícil | 14 |
-| Exoplaneta Kepler-186f | Legendario | 15 |
-| Agujero negro M87* | Legendario | 16 |
+- La consola implementa inventario compatible con transporte.
+- El input automatizado acepta celdas de datos Coronalis para evitar atascar la máquina con ítems incorrectos.
+- Las recetas usan componentes de Slimefun como circuitos, cables, motores, baterías, conectores de energía y placas reforzadas.
 
-Cada tier aplica un **multiplicador de XP** sobre los valores de `config.yml`.
+### Calibración y Telemetría
 
-### Investigaciones Slimefun
+Cada radiotelescopio mantiene estado técnico:
 
-1. **Ingeniería de radio** — antena y receptor  
-2. **Control PID del vacío** — PID y telescopio  
-3. **Interferometría VLBI** — celda de datos  
-4. **Operaciones de cielo profundo** — consola y eco de fase  
+- Error de azimut/elevación.
+- Amplitud y fase de señal.
+- Temperatura de motor y corriente.
+- Estado runtime: `IDLE`, `SLEWING`, `TRACKING`, `FAULT`.
+- Perfil PID ajustable.
+- Contadores de reset y fallos inyectados.
 
-### Eventos cósmicos
+### Programas Científicos
 
-El **CosmicEventManager** puede disparar eventos aleatorios (ventanas de 60–180 s, probabilidad configurable) que alteran la sesión de observación.
+Los programas funcionan como misiones de observatorio: exigen tamaño de array, baselines, calibración, señal y módulos concretos.
 
-### Código en evolución
+| Programa | Requisitos destacados |
+|---|---|
+| `orion_molecular_map` | Primer mapa molecular, 4 antenas |
+| `crab_synchrotron_watch` | Amplificador de señal y flujo estable |
+| `andromeda_hi_survey` | Banco de datos y survey HI |
+| `pulsar_timing_run` | Auto calibrador y fase estable |
+| `sag_a_phase_lock` | Array grande contra Sagitario A* |
+| `kepler_thermal_signature` | Señal débil con alto buffer |
+| `m87_event_horizon_frame` | Emulación tipo EHT |
+| `full_array_first_light` | Los 50 radiotelescopios, 1225 baselines y calibración casi perfecta |
 
-El repo incluye también capas de red y acceso (`CoronalisNetwork`, `NetworkRegistry`, `AccessManager`, `SoundManager`, `TelescopeState`) para ampliar multijugador y telemetría en futuras versiones.
+### Terminal de Comandos
+
+Coronalis incluye comandos para probar y diagnosticar sin depender siempre de testeo ingame manual.
+
+```text
+/coronalis help
+/coronalis guide [energia|cableado|calibracion|automatizacion|programas]
+/coronalis items
+/coronalis status
+/coronalis telemetry
+/coronalis compare
+/coronalis smoke
+/coronalis move <az> <el>
+/coronalis tune <preset|custom> [args]
+/coronalis step <az> <el> [ticks]
+/coronalis scan <spiral|wave|raster>
+/coronalis dashboard
+/coronalis maintenance [repair]
+/coronalis export <json|csv>
+/coronalis programs
+/coronalis program <id|status|complete|clear>
+/coronalis auth
+```
+
+### Seguridad de Consola
+
+- Consola bloqueable por usuario.
+- Invitaciones a otros jugadores.
+- Autenticación por contraseña para instalaciones protegidas.
+- Evita el enfoque de multijugador simultáneo global que podría introducir bugs de concurrencia a futuro.
 
 ---
 
-## Arquitectura (resumen)
+## Flujo De Juego
+
+1. Investiga los ítems de Coronalis en Slimefun.
+2. Craftea una consola, radiotelescopios, cable coaxial y módulos.
+3. Conecta todo por cable hasta formar una red válida.
+4. Alimenta la consola con SU nativo, núcleos o energía externa EnergyNet.
+5. Calibra el array y revisa telemetría.
+6. Selecciona objetivo o programa científico.
+7. Correlaciona señal, genera eco de fase y analiza recompensas.
+8. Exporta telemetría o ejecuta maintenance si algo se calienta o falla.
+
+---
+
+## Arquitectura
 
 ```mermaid
 flowchart LR
-  subgraph mundo [Mundo Minecraft]
-    ANT[Antenas]
-    CON[Consola]
+  subgraph Mundo["Mundo Minecraft"]
+    TEL["Radiotelescopios x50"]
+    CABLE["Cable coaxial"]
+    CORE["Núcleos SU"]
+    MODS["Amplificadores / Bancos / Auto calibradores"]
+    CON["Consola"]
   end
-  subgraph addon [Coronalis]
-    DISC[DiscoveryService]
-    COS[CosmicEventManager]
-    SF[Slimefun items]
+
+  subgraph Coronalis["Coronalis"]
+    NET["NetworkRegistry"]
+    OPS["ObservatoryOperations"]
+    PROG["ObservationProgramManager"]
+    DISC["DiscoveryService"]
+    ACCESS["AccessManager"]
+    SOUND["SoundManager"]
   end
-  JUG[Jugador] --> CON
-  ANT --> CON
-  CON --> DISC
-  DISC --> JUG
-  COS --> CON
-  SF --> ANT
-  SF --> CON
+
+  subgraph Slimefun["Slimefun / Addons"]
+    ENERGY["EnergyNet"]
+    CARGO["Cargo / Hoppers / Storage"]
+    RECIPES["SlimefunItems recipes"]
+  end
+
+  TEL --> CABLE --> CON
+  CORE --> CABLE
+  MODS --> CABLE
+  CON --> NET --> OPS
+  OPS --> PROG
+  OPS --> DISC
+  CON --> ACCESS
+  OPS --> SOUND
+  ENERGY --> CON
+  CARGO --> CON
+  RECIPES --> TEL
 ```
 
 ---
@@ -104,86 +179,103 @@ flowchart LR
 ## Requisitos
 
 | Dependencia | Versión |
-|-------------|---------|
-| **Paper** | 1.21.1 |
-| **Slimefun 6** (fork Drake / DrakesCraft-Labs) | 11.x |
-| **Java** | 21 |
-
-En servidores Drake, el JAR se publica como **`Coronalis-drake`** vía autoupdate del monorepo.
+|---|---|
+| Paper | 1.21.1 |
+| Java | 21 |
+| Slimefun 6 Drake / DrakesCraft-Labs | 11.x |
+| Dough / dependencias Drake | Según servidor |
 
 ---
 
 ## Instalación
 
-1. Compila o descarga `Coronalis.jar` (ver [Build](#build)).
-2. Coloca el JAR en `plugins/` junto a **Slimefun** y **Dough** (Drake).
-3. Reinicia el servidor; se genera `plugins/Coronalis/config.yml`.
-4. Investiga en Slimefun, craftea la consola y las antenas, y empieza a apuntar.
+1. Compila o descarga `Coronalis.jar`.
+2. Coloca el JAR en `plugins/` junto a Slimefun y Dough.
+3. Reinicia el servidor.
+4. Revisa `plugins/Coronalis/config.yml`.
+5. Ejecuta `/coronalis help` y `/coronalis smoke`.
 
 ---
 
 ## Configuración
 
-Fragmento de `config.yml` (XP y eventos):
+Fragmento relevante:
 
 ```yaml
 discovery-xp:
   first_target_lock: 6
   tracking_lock: 10
   first_correlation: 25
+  first_full_calibration: 18
   record_analysis: 200
   record_repeat: 40
+
+  program_orion_molecular_map: 140
+  program_crab_synchrotron_watch: 180
+  program_andromeda_hi_survey: 220
+  program_pulsar_timing_run: 300
+  program_sag_a_phase_lock: 380
+  program_kepler_thermal_signature: 520
+  program_m87_event_horizon_frame: 700
+  program_full_array_first_light: 1000
 
 cosmic-events:
   chance-denominator: 3
   min-duration-seconds: 60
   max-duration-seconds: 180
-
-research-unlock-bonus-xp: 10
 ```
-
-Ajusta valores sin recompilar; recarga con el reinicio del plugin o recarga de config si tu build lo expone.
 
 ---
 
-## Build
-
-### Repo público (este repositorio)
+## Build y Smoke
 
 ```powershell
-cd Coronalis
+cd C:\Users\pablo\Documentos\GitHub\Coronalis
 mvn -DskipTests package
 ```
 
-Salida: `target/Coronalis.jar`
+Salida:
 
-> Necesitas acceso al repositorio Maven de **DrakesCraft-Labs** (`slimefun-core`, `dough-core`, `drakes-labs-autoupdate`). Configura `GITHUB_TOKEN` o credenciales en `settings.xml` si Maven falla al resolver dependencias.
-
-### Monorepo DrakesCraft-Labs
-
-```powershell
-mvn -pl sources/community-addons/Coronalis -am -DskipTests package
+```text
+target/Coronalis.jar
 ```
 
-Salida: `Coronalis-vUNOFFICIAL.jar` en `target/` del módulo.
+Smoke local:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\smoke.ps1 -SkipBuild
+```
+
+El smoke valida:
+
+- JAR generado.
+- `plugin.yml` y `config.yml` empaquetados.
+- Comandos publicados.
+- Clases principales empaquetadas.
+- Compatibilidad EnergyNet/cargo.
+- Telemetría, PID, maintenance, export y programas científicos.
+- Recetas basadas en componentes Slimefun.
 
 ---
 
-## Estructura del proyecto
+## Estructura
 
-```
+```text
 Coronalis/
-├── assets/hero.svg              # Banner README
-├── assets/banner-github-social.svg
-├── src/main/java/.../coronalis/
-│   ├── Coronalis.java           # Plugin principal
-│   ├── discovery/               # XP y PDC
-│   ├── implementation/          # Items, consola, telescopio
-│   ├── managers/                # Eventos cósmicos, red, sonido
-│   └── ...
+├── assets/
+│   ├── hero.svg
+│   └── banner-github-social.svg
+├── docs/
+├── scripts/
+│   └── smoke.ps1
+├── src/main/java/com/github/jackstar/coronalis/
+│   ├── commands/
+│   ├── discovery/
+│   ├── implementation/
+│   └── managers/
 ├── src/main/resources/
-│   ├── plugin.yml
-│   └── config.yml
+│   ├── config.yml
+│   └── plugin.yml
 ├── pom.xml
 ├── README.md
 └── CREDITS.md
@@ -191,15 +283,15 @@ Coronalis/
 
 ---
 
-## Créditos y soporte
+## Créditos
 
-- Autor: **[JackStar6677](https://github.com/JackStar6677-1)**  
-- Issues: [github.com/JackStar6677-1/Coronalis/issues](https://github.com/JackStar6677-1/Coronalis/issues)  
-- Detalle de marca: [CREDITS.md](CREDITS.md)  
-- Publicar en GitHub: [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md)
+- Autor: **[JackStar6677](https://github.com/JackStar6677-1)**
+- Issues: [github.com/JackStar6677-1/Coronalis/issues](https://github.com/JackStar6677-1/Coronalis/issues)
+- Marca y créditos: [CREDITS.md](CREDITS.md)
+- Publicación GitHub: [docs/GITHUB_SETUP.md](docs/GITHUB_SETUP.md)
 
 ---
 
 <p align="center">
-  <em>Coronalis Array Labs — escucha el vacío, cataloga la fase, gana XP.</em>
+  <em>Coronalis Array Labs: cablea el cielo, calibra la fase, escucha el vacío.</em>
 </p>
