@@ -10,7 +10,7 @@ website: https://github.com/JackStar6677-1/Coronalis
 commands:
   coronalis:
     description: Terminal, guías y smoke test de Coronalis.
-    usage: /coronalis <help|guide|items|smoke|status|telemetry|compare|move|reset|tune|step|scan|dashboard|maintenance|export|programs|program|auth>
+    usage: /coronalis <help|guide|book|station|items|smoke|status|telemetry|compare|move|reset|tune|step|scan|dashboard|maintenance|export|programs|program|auth>
     aliases: [cor]
 permissions:
   coronalis.admin:

@@ -11,6 +11,7 @@ import com.github.jackstar.coronalis.implementation.Items;
 import com.github.jackstar.coronalis.implementation.items.ArrayNetworkBlock;
 import com.github.jackstar.coronalis.implementation.items.ControlConsole;
 import com.github.jackstar.coronalis.implementation.items.DataRecordItem;
+import com.github.jackstar.coronalis.implementation.items.FieldGuideItem;
 import com.github.jackstar.coronalis.implementation.items.RadioTelescope;
 import com.github.drakescraft_labs.slimefun4.implementation.SlimefunItems;
 import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem;
@@ -35,6 +36,7 @@ public class ItemSetup {
         Research deepSkyOps = new Research(new NamespacedKey(plugin, "deep_sky_ops"), 88623, "Operaciones de Cielo Profundo", 44);
         Research arrayInfrastructure = new Research(new NamespacedKey(plugin, "array_infrastructure"), 88624, "Infraestructura de Array", 18);
         Research arrayAutomation = new Research(new NamespacedKey(plugin, "array_automation"), 88625, "Automatización de Observatorio", 36);
+        Research stationEngineering = new Research(new NamespacedKey(plugin, "station_engineering"), 88626, "Estaciones de Escucha", 28);
 
         /* 1. Componentes Básicos */
         SlimefunItem antenna = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_ANTENNA_DISH, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
@@ -126,7 +128,63 @@ public class ItemSetup {
         console.setResearch(deepSkyOps);
         console.register(plugin);
 
-        /* 3. Recompensas (Descubrimientos) */
+        /* 3. Estaciones Firewatch y enlaces */
+        SlimefunItem foundation = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_FOUNDATION_ANCHOR, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.REINFORCED_PLATE, SlimefunItems.STEEL_PLATE, SlimefunItems.REINFORCED_PLATE,
+                SlimefunItems.LEAD_INGOT, new ItemStack(Material.LODESTONE), SlimefunItems.LEAD_INGOT,
+                SlimefunItems.STEEL_PLATE, SlimefunItems.HARDENED_METAL_INGOT, SlimefunItems.STEEL_PLATE
+        });
+        foundation.setResearch(stationEngineering);
+        foundation.register(plugin);
+
+        SlimefunItem segment = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_TOWER_SEGMENT, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.STEEL_PLATE, SlimefunItems.COPPER_INGOT, SlimefunItems.STEEL_PLATE,
+                SlimefunItems.COPPER_WIRE, new ItemStack(Material.SCAFFOLDING), SlimefunItems.COPPER_WIRE,
+                SlimefunItems.STEEL_PLATE, SlimefunItems.COPPER_INGOT, SlimefunItems.STEEL_PLATE
+        });
+        segment.setResearch(stationEngineering);
+        segment.register(plugin);
+
+        SlimefunItem platform = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_WATCH_PLATFORM, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.REINFORCED_PLATE, SlimefunItems.STEEL_PLATE, SlimefunItems.REINFORCED_PLATE,
+                Items.CORONALIS_TOWER_SEGMENT, new ItemStack(Material.SMITHING_TABLE), Items.CORONALIS_TOWER_SEGMENT,
+                SlimefunItems.STEEL_PLATE, SlimefunItems.ELECTRIC_MOTOR, SlimefunItems.STEEL_PLATE
+        });
+        platform.setResearch(stationEngineering);
+        platform.register(plugin);
+
+        SlimefunItem mast = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_RADIO_MAST, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.COPPER_WIRE, Items.CORONALIS_RECEIVER, SlimefunItems.COPPER_WIRE,
+                SlimefunItems.STEEL_PLATE, new ItemStack(Material.LIGHTNING_ROD), SlimefunItems.STEEL_PLATE,
+                Items.CORONALIS_COAXIAL_CABLE, SlimefunItems.ELECTRIC_MOTOR, Items.CORONALIS_COAXIAL_CABLE
+        });
+        mast.setResearch(stationEngineering);
+        mast.register(plugin);
+
+        SlimefunItem dish = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_PARABOLIC_DISH, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                SlimefunItems.ALUMINUM_INGOT, Items.CORONALIS_ANTENNA_DISH, SlimefunItems.ALUMINUM_INGOT,
+                SlimefunItems.COPPER_WIRE, Items.CORONALIS_RECEIVER, SlimefunItems.COPPER_WIRE,
+                SlimefunItems.STEEL_PLATE, Items.CORONALIS_RADIO_MAST, SlimefunItems.STEEL_PLATE
+        });
+        dish.setResearch(stationEngineering);
+        dish.register(plugin);
+
+        SlimefunItem repeater = new SlimefunItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_SIGNAL_REPEATER, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                Items.CORONALIS_RECEIVER, SlimefunItems.GPS_TRANSMITTER_2, Items.CORONALIS_RECEIVER,
+                Items.CORONALIS_SIGNAL_AMPLIFIER, SlimefunItems.ADVANCED_CIRCUIT_BOARD, Items.CORONALIS_SIGNAL_AMPLIFIER,
+                SlimefunItems.ENERGY_CONNECTOR, Items.CORONALIS_SIGNAL_CORE, SlimefunItems.ENERGY_CONNECTOR
+        });
+        repeater.setResearch(stationEngineering);
+        repeater.register(plugin);
+
+        FieldGuideItem guide = new FieldGuideItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_FIELD_GUIDE, RecipeType.ENHANCED_CRAFTING_TABLE, new ItemStack[] {
+                new ItemStack(Material.PAPER), new ItemStack(Material.COMPASS), new ItemStack(Material.PAPER),
+                new ItemStack(Material.BOOK), SlimefunItems.GPS_TRANSMITTER, new ItemStack(Material.BOOK),
+                new ItemStack(Material.PAPER), Items.CORONALIS_RECEIVER, new ItemStack(Material.PAPER)
+        });
+        guide.register(plugin);
+
+        /* 4. Recompensas (Descubrimientos) */
         DataRecordItem record = new DataRecordItem(ItemGroups.CORONALIS_GROUP, Items.CORONALIS_RECORD_DISCOVERED, RecipeType.NULL, new ItemStack[9]);
         record.register(plugin);
 
@@ -144,6 +202,9 @@ public class ItemSetup {
 
         arrayAutomation.addItems(amplifier, dataBank, autoCalibrator);
         arrayAutomation.register();
+
+        stationEngineering.addItems(foundation, segment, platform, mast, dish, repeater);
+        stationEngineering.register();
 
         deepSkyOps.addItems(console, record);
         deepSkyOps.register();

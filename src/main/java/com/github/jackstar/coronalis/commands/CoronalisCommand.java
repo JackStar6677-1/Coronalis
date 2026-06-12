@@ -2,6 +2,7 @@ package com.github.jackstar.coronalis.commands;
 
 import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItem;
 import com.github.jackstar.coronalis.Coronalis;
+import com.github.jackstar.coronalis.implementation.Items;
 import com.github.jackstar.coronalis.implementation.data.CoronalisNetwork;
 import com.github.jackstar.coronalis.implementation.data.ObservationProgram;
 import com.github.jackstar.coronalis.implementation.data.TelescopeState;
@@ -39,7 +40,14 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
         "CORONALIS_AUTO_CALIBRATOR",
         "CORONALIS_RADIO_TELESCOPE",
         "CORONALIS_CONTROL_CONSOLE",
-        "CORONALIS_RECORD_DISCOVERED"
+        "CORONALIS_RECORD_DISCOVERED",
+        "CORONALIS_FOUNDATION_ANCHOR",
+        "CORONALIS_TOWER_SEGMENT",
+        "CORONALIS_WATCH_PLATFORM",
+        "CORONALIS_RADIO_MAST",
+        "CORONALIS_PARABOLIC_DISH",
+        "CORONALIS_SIGNAL_REPEATER",
+        "CORONALIS_FIELD_GUIDE"
     };
 
     @Override
@@ -49,6 +57,7 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
         switch (sub) {
             case "help", "ayuda" -> showHelp(sender);
             case "guide", "guia" -> showGuide(sender, args.length >= 2 ? args[1] : "inicio");
+            case "book", "manual", "libro" -> openBook(sender);
             case "items" -> showItems(sender);
             case "smoke", "selftest", "test" -> runSmoke(sender);
             case "compare" -> showSimulatorCompare(sender);
@@ -77,6 +86,13 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
                 }
                 showNearestStatus(player);
             }
+            case "station", "torre", "estacion" -> {
+                if (!(sender instanceof Player player)) {
+                    sender.sendMessage("[Coronalis] /coronalis station requiere jugador.");
+                    return true;
+                }
+                Coronalis.instance().getStationManager().sendNearestStatus(player);
+            }
             case "telemetry", "telemetria" -> {
                 if (!(sender instanceof Player player)) {
                     sender.sendMessage("[Coronalis] /coronalis telemetry requiere jugador para localizar una consola cercana.");
@@ -96,11 +112,11 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
             return filter(args[0], List.of(
                 "help", "guide", "items", "smoke", "status", "telemetry", "compare",
                 "move", "reset", "fault", "tune", "step", "scan", "dashboard", "maintenance", "export",
-                "programs", "program", "auth"
+                "programs", "program", "auth", "book", "station"
             ));
         }
         if (args.length == 2 && ("guide".equalsIgnoreCase(args[0]) || "guia".equalsIgnoreCase(args[0]))) {
-            return filter(args[1], List.of("inicio", "energia", "cableado", "calibracion", "automatizacion", "programas", "acceso", "fallos", "ciencia", "operaciones"));
+            return filter(args[1], List.of("inicio", "torres", "radio", "energia", "cableado", "calibracion", "automatizacion", "programas", "acceso", "fallos", "ciencia", "operaciones"));
         }
         if (args.length == 2 && ("tune".equalsIgnoreCase(args[0]) || "pid".equalsIgnoreCase(args[0]))) {
             return filter(args[1], List.of("default", "aggressive", "damped", "sluggish", "precision", "storm_safe", "custom"));
@@ -132,6 +148,10 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage("§d/coronalis guide cableado §8- §7qué se conecta por cable coaxial.");
         sender.sendMessage("§d/coronalis guide calibracion §8- §7cómo calibrar y desbloquear correlación.");
         sender.sendMessage("§d/coronalis guide automatizacion §8- §7cargo, energía, auto-calibrador y modo auto.");
+        sender.sendMessage("§d/coronalis guide torres §8- §7construcción Firewatch y validación.");
+        sender.sendMessage("§d/coronalis guide radio §8- §7mástiles, platos, repetidores y enlaces.");
+        sender.sendMessage("§d/coronalis book §8- §7abre el Manual de Campo.");
+        sender.sendMessage("§d/coronalis station §8- §7estado de la estación cercana.");
         sender.sendMessage("§d/coronalis guide acceso §8- §7owner, whitelist y contraseña.");
         sender.sendMessage("§d/coronalis guide fallos §8- §7qué hacer si algo no funciona.");
         sender.sendMessage("§d/coronalis items §8- §7lista de bloques/ítems del addon.");
@@ -161,6 +181,19 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§73. Une consola, telescopios y módulos con §8Cable Coaxial de Fase§7.");
                 sender.sendMessage("§74. Alimenta la red con §bNúcleos SU§7 o energía eléctrica Slimefun.");
                 sender.sendMessage("§75. Calibra, elige objetivo, alinea PID y correlaciona con §bCeldas de Datos§7.");
+            }
+            case "torres", "torre", "firewatch" -> {
+                sender.sendMessage("§71. Coloca un §6Anclaje de Cimentación§7 en suelo firme o montaña.");
+                sender.sendMessage("§72. Construye libremente y añade un §6Segmento§7 cada 16 bloques como máximo.");
+                sender.sendMessage("§73. La §ePlataforma Firewatch§7 debe quedar al menos 12 bloques sobre la base.");
+                sender.sendMessage("§74. Instala un §dMástil de Radio§7 junto a la plataforma para volverla operativa.");
+                sender.sendMessage("§75. A 50 bloques del límite superior se clasifica como §bEstratosférica§7.");
+            }
+            case "radio", "antenas", "enlaces" -> {
+                sender.sendMessage("§7Una estación con mástil enlaza hasta §e192 bloques§7 con línea de visión.");
+                sender.sendMessage("§7El §bPlato Parabólico§7 eleva el alcance a §e512 bloques§7.");
+                sender.sendMessage("§7Un §5Repetidor§7 cercano añade alcance sin cargar chunks.");
+                sender.sendMessage("§7Los enlaces nunca cruzan mundos y se recalculan al modificar componentes.");
             }
             case "energia" -> {
                 sender.sendMessage("§7La consola acepta dos fuentes: §bNúcleos de Energía SU§7 por cable y §eJoules§7 de EnergyNet Slimefun.");
@@ -219,7 +252,7 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage("§8- §d/coronalis maintenance repair §7AI z-score + reset de fallos.");
             }
             default -> {
-                sender.sendMessage("§7Tema no reconocido. Usa: §einicio, energia, cableado, calibracion, automatizacion, programas, acceso, fallos, ciencia, operaciones§7.");
+                sender.sendMessage("§7Tema no reconocido. Usa: §einicio, torres, radio, energia, cableado, calibracion, automatizacion, programas, acceso, fallos, ciencia, operaciones§7.");
             }
         }
     }
@@ -375,9 +408,12 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
         require(Coronalis.instance().getNetworkRegistry() != null, "NetworkRegistry activo", failures);
         require(Coronalis.instance().getAccessManager() != null, "AccessManager activo", failures);
         require(Coronalis.instance().getSoundManager() != null, "SoundManager activo", failures);
+        require(Coronalis.instance().getDatabase() != null, "SQLite activo", failures);
+        require(Coronalis.instance().getStationManager() != null, "StationManager activo", failures);
         require(CoronalisNetwork.MAX_TELESCOPES == 50, "Límite de 50 telescopios", failures);
         require(Coronalis.instance().getCommand("coronalis") != null, "Comando /coronalis registrado", failures);
         require(Coronalis.instance().getConfig().contains("discovery-xp.first_full_calibration"), "Config XP calibración", failures);
+        require(Coronalis.instance().getConfig().contains("structures.stratospheric-margin"), "Config estaciones", failures);
 
         for (String id : CORONALIS_ITEMS) {
             require(SlimefunItem.getById(id) != null, "Item registrado: " + id, failures);
@@ -395,6 +431,14 @@ public class CoronalisCommand implements CommandExecutor, TabCompleter {
         if (!condition) {
             failures.add(label);
         }
+    }
+
+    private static void openBook(@Nonnull CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("[Coronalis] /coronalis book requiere jugador.");
+            return;
+        }
+        player.openBook(Items.CORONALIS_FIELD_GUIDE.clone());
     }
 
     private static void showNearestStatus(@Nonnull Player player) {

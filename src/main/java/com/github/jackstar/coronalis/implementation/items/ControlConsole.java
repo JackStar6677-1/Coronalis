@@ -16,6 +16,7 @@ import com.github.drakescraft_labs.slimefun4.api.items.SlimefunItemStack;
 import com.github.drakescraft_labs.slimefun4.api.recipes.RecipeType;
 import com.github.drakescraft_labs.slimefun4.core.attributes.EnergyNetComponent;
 import com.github.drakescraft_labs.slimefun4.core.networks.energy.EnergyNetComponentType;
+import com.github.drakescraft_labs.slimefun4.libraries.dough.protection.Interaction;
 import com.github.drakescraft_labs.slimefun4.utils.ChestMenuUtils;
 import com.github.drakescraft_labs.slimefun4.legacy.Objects.SlimefunItem.interfaces.InventoryBlock;
 import com.github.drakescraft_labs.slimefun4.legacy.api.BlockStorage;
@@ -24,7 +25,6 @@ import com.github.drakescraft_labs.slimefun4.legacy.api.inventory.BlockMenuPrese
 import com.github.drakescraft_labs.slimefun4.legacy.api.inventory.DirtyChestMenu;
 import com.github.drakescraft_labs.slimefun4.legacy.api.item_transport.ItemTransportFlow;
 import dev.drake.dough.items.CustomItemStack;
-import dev.drake.dough.protection.Interaction;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;

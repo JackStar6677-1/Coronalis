@@ -51,3 +51,18 @@ messages:
   new-discovery:    "&aDescubrimiento nuevo: &f%name% &7(+%xp% XP)"
   repeat-discovery: "&7Señal ya catalogada: &f%name% &7(+%xp% XP)"
   research-bonus:   "&eInvestigación desbloqueada: &f%research% &7(+%xp% XP)"
+
+# ── Estaciones Firewatch ─────────────────────────────────────────────────────
+structures:
+  minimum-rise: 12
+  max-segment-gap: 16
+  # La categoría estratosférica comienza a esta distancia del techo del mundo.
+  stratospheric-margin: 50
+  # Freno defensivo ante abuso o una automatización descontrolada.
+  max-components: 5000
+
+radio:
+  base-range: 192.0
+  dish-range: 512.0
+  repeater-radius: 64.0
+  repeater-bonus: 128.0

@@ -3,7 +3,7 @@ package com.github.jackstar.coronalis.managers;
 import com.github.jackstar.coronalis.Coronalis;
 import com.github.jackstar.coronalis.implementation.data.CoronalisNetwork;
 import com.github.jackstar.coronalis.implementation.data.TelescopeState;
-import com.github.jackstar.coronalis.managers.SoundManager;
+import com.github.jackstar.coronalis.implementation.items.ControlConsole;
 import com.github.drakescraft_labs.slimefun4.legacy.api.BlockStorage;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -39,12 +39,20 @@ public class NetworkRegistry {
     private double globalScienceTime = 0.0;
 
     /** Límite BFS de bloques a explorar por validación de cable. */
-    private static final int BFS_LIMIT = 900;
+    private static final int BFS_LIMIT = 8192;
 
     /** Radio de detección de redes rivales (bloques). */
     public static final int RIVAL_DETECT_RADIUS = 200;
 
     private static final Set<String> MODULE_IDS = Set.of(
+        "CORONALIS_SIGNAL_AMPLIFIER",
+        "CORONALIS_DATA_BANK",
+        "CORONALIS_AUTO_CALIBRATOR"
+    );
+
+    private static final Set<String> ENDPOINT_IDS = Set.of(
+        "CORONALIS_RADIO_TELESCOPE",
+        "CORONALIS_SIGNAL_CORE",
         "CORONALIS_SIGNAL_AMPLIFIER",
         "CORONALIS_DATA_BANK",
         "CORONALIS_AUTO_CALIBRATOR"
@@ -101,29 +109,10 @@ public class NetworkRegistry {
      * @return true si hay un camino de cable continuo entre los dos bloques.
      */
     public boolean isConnectedByCable(@Nonnull Location start, @Nonnull Location targetConsole) {
-        if (start.getWorld() == null || !start.getWorld().equals(targetConsole.getWorld())) return false;
-
-        Set<Location> visited = new HashSet<>();
-        Queue<Location> queue = new ArrayDeque<>();
-
-        // Los vecinos del telescopio son el punto de inicio del BFS
-        addNeighbors(start, queue, visited);
-        int steps = 0;
-
-        while (!queue.isEmpty() && steps < BFS_LIMIT) {
-            Location current = queue.poll();
-            steps++;
-
-            // ¿Llegamos a la consola?
-            if (current.equals(targetConsole.toBlockLocation())) return true;
-
-            // Solo seguimos por cables
-            String id = slimefunId(current.getBlock());
-            if ("CORONALIS_COAXIAL_CABLE".equals(id)) {
-                addNeighbors(current, queue, visited);
-            }
+        if (start.getWorld() == null || !start.getWorld().equals(targetConsole.getWorld())) {
+            return false;
         }
-        return false;
+        return scanConnectedNetwork(targetConsole).contains(start.toBlockLocation());
     }
 
     /**
@@ -148,14 +137,7 @@ public class NetworkRegistry {
 
     @Nonnull
     public List<Location> findConnectedEnergyNodes(@Nonnull Location consoleLoc) {
-        List<Location> candidates = findBlocksInRadius(consoleLoc, 50, "CORONALIS_SIGNAL_CORE");
-        List<Location> connected = new ArrayList<>();
-        for (Location candidate : candidates) {
-            if (isConnectedByCable(candidate, consoleLoc)) {
-                connected.add(candidate);
-            }
-        }
-        return connected;
+        return scanConnectedNetwork(consoleLoc).get("CORONALIS_SIGNAL_CORE");
     }
 
     /**
@@ -171,10 +153,9 @@ public class NetworkRegistry {
             net.clearEnergyNodes();
             net.clearModules();
 
-            // Escanear telescopios en radio 50 bloques
-            List<Location> candidates = findTelescopesInRadius(consoleLoc, 50);
-            List<Location> connected  = findConnectedTelescopes(consoleLoc, candidates);
-            List<Location> energyNodes = findConnectedEnergyNodes(consoleLoc);
+            NetworkScan scan = scanConnectedNetwork(consoleLoc);
+            List<Location> connected = scan.get("CORONALIS_RADIO_TELESCOPE");
+            List<Location> energyNodes = scan.get("CORONALIS_SIGNAL_CORE");
 
             int added = 0;
             for (Location loc : connected) {
@@ -190,7 +171,7 @@ public class NetworkRegistry {
                 net.addEnergyNode(loc);
             }
             for (String moduleId : MODULE_IDS) {
-                for (Location loc : findConnectedModules(consoleLoc, moduleId)) {
+                for (Location loc : scan.get(moduleId)) {
                     net.addModule(moduleId, loc);
                 }
             }
@@ -211,12 +192,18 @@ public class NetworkRegistry {
 
     public void rebuildNetworksNear(@Nonnull Location loc, int radius) {
         if (loc.getWorld() == null) return;
-        for (Location consoleLoc : findBlocksInRadius(loc, radius, "CORONALIS_CONTROL_CONSOLE")) {
-            rebuildNetwork(consoleLoc);
+        double radiusSquared = (double) radius * radius;
+        for (Location consoleLoc : new ArrayList<>(ControlConsole.ACTIVE_CONSOLES)) {
+            if (consoleLoc.getWorld() != null
+                && consoleLoc.getWorld().equals(loc.getWorld())
+                && consoleLoc.distanceSquared(loc) <= radiusSquared) {
+                rebuildNetwork(consoleLoc);
+            }
         }
     }
 
     public void tickAll() {
+        removeMissingLoadedConsoles();
         for (CoronalisNetwork network : networks.values()) {
             try {
                 network.generateSU();
@@ -240,18 +227,6 @@ public class NetworkRegistry {
         for (TelescopeState state : network.getTelescopes().values()) {
             state.updateTelemetry(consoleLoc, currentAz, currentEl, targetAz, targetEl, globalScienceTime);
         }
-    }
-
-    @Nonnull
-    private List<Location> findConnectedModules(@Nonnull Location consoleLoc, @Nonnull String moduleId) {
-        List<Location> candidates = findBlocksInRadius(consoleLoc, 50, moduleId);
-        List<Location> connected = new ArrayList<>();
-        for (Location candidate : candidates) {
-            if (isConnectedByCable(candidate, consoleLoc)) {
-                connected.add(candidate);
-            }
-        }
-        return connected;
     }
 
     private void tickAutoCalibrators(@Nonnull CoronalisNetwork network) {
@@ -357,40 +332,76 @@ public class NetworkRegistry {
             BlockFace.NORTH, BlockFace.SOUTH, BlockFace.EAST,
             BlockFace.WEST, BlockFace.UP, BlockFace.DOWN
         }) {
-            Location neighbor = loc.getBlock().getRelative(face).getLocation();
-            if (visited.add(neighbor)) queue.offer(neighbor);
-        }
-    }
-
-    @Nonnull
-    private static List<Location> findTelescopesInRadius(@Nonnull Location center, int radius) {
-        List<Location> result = new ArrayList<>();
-        if (center.getWorld() == null) return result;
-
-        result.addAll(findBlocksInRadius(center, radius, "CORONALIS_RADIO_TELESCOPE"));
-        return result;
-    }
-
-    @Nonnull
-    private static List<Location> findBlocksInRadius(@Nonnull Location center, int radius, @Nonnull String slimefunId) {
-        List<Location> result = new ArrayList<>();
-        if (center.getWorld() == null) return result;
-
-        for (int x = -radius; x <= radius; x++) {
-            for (int y = -10; y <= 10; y++) {
-                for (int z = -radius; z <= radius; z++) {
-                    if (x == 0 && y == 0 && z == 0) continue;
-                    Block b = center.getWorld().getBlockAt(
-                        center.getBlockX() + x,
-                        center.getBlockY() + y,
-                        center.getBlockZ() + z);
-                    if (slimefunId.equals(slimefunId(b))) {
-                        result.add(b.getLocation());
-                    }
-                }
+            Location neighbor = loc.getBlock().getRelative(face).getLocation().toBlockLocation();
+            if (neighbor.getWorld() != null
+                && neighbor.getWorld().isChunkLoaded(neighbor.getBlockX() >> 4, neighbor.getBlockZ() >> 4)
+                && visited.add(neighbor)) {
+                queue.offer(neighbor);
             }
         }
-        return result;
+    }
+
+    @Nonnull
+    private static NetworkScan scanConnectedNetwork(@Nonnull Location consoleLoc) {
+        NetworkScan scan = new NetworkScan();
+        if (consoleLoc.getWorld() == null) {
+            return scan;
+        }
+
+        Location origin = consoleLoc.toBlockLocation();
+        Set<Location> visited = new HashSet<>();
+        Queue<Location> queue = new ArrayDeque<>();
+        visited.add(origin);
+        addNeighbors(origin, queue, visited);
+
+        int steps = 0;
+        while (!queue.isEmpty() && steps++ < BFS_LIMIT) {
+            Location current = queue.poll();
+            String id = slimefunId(current.getBlock());
+            if ("CORONALIS_COAXIAL_CABLE".equals(id)) {
+                addNeighbors(current, queue, visited);
+            } else if (ENDPOINT_IDS.contains(id)) {
+                scan.add(id, current);
+            }
+        }
+
+        if (!queue.isEmpty()) {
+            Coronalis.log("[NetworkRegistry] Recorrido limitado a " + BFS_LIMIT
+                + " bloques cargados desde " + networkId(origin) + ".");
+        }
+        return scan;
+    }
+
+    private void removeMissingLoadedConsoles() {
+        for (Location consoleLoc : new ArrayList<>(ControlConsole.ACTIVE_CONSOLES)) {
+            if (consoleLoc.getWorld() == null
+                || !consoleLoc.getWorld().isChunkLoaded(
+                    consoleLoc.getBlockX() >> 4,
+                    consoleLoc.getBlockZ() >> 4)) {
+                continue;
+            }
+            if (!"CORONALIS_CONTROL_CONSOLE".equals(slimefunId(consoleLoc.getBlock()))) {
+                ControlConsole.ACTIVE_CONSOLES.remove(consoleLoc);
+                remove(consoleLoc);
+            }
+        }
+    }
+
+    private static final class NetworkScan {
+        private final Map<String, List<Location>> endpoints = new HashMap<>();
+
+        private void add(@Nonnull String id, @Nonnull Location location) {
+            endpoints.computeIfAbsent(id, ignored -> new ArrayList<>()).add(location);
+        }
+
+        @Nonnull
+        private List<Location> get(@Nonnull String id) {
+            return endpoints.getOrDefault(id, Collections.emptyList());
+        }
+
+        private boolean contains(@Nonnull Location location) {
+            return endpoints.values().stream().anyMatch(locations -> locations.contains(location));
+        }
     }
 
     @Nonnull
