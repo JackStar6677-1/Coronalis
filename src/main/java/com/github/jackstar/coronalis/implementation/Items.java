@@ -231,7 +231,9 @@ public final class Items {
             Material.WRITTEN_BOOK,
             "&dManual de Campo Coronalis",
             "&7Construcción, radio, seguridad y operación.",
-            "&7Clic derecho para abrir."
+            "&7Clic derecho para abrir.",
+            "",
+            "&8Autor: &7DrakesCraft Array Labs"
     );
 
     /* Ítems Especiales */
@@ -297,6 +299,12 @@ public final class Items {
         meta.addPage(
             "§2§l7. DIAGNÓSTICO\n\n§0Usa:\n§5/coronalis station\n§5/coronalis status\n§5/coronalis smoke\n\n" +
             "Consulta /coronalis guide torres o radio."
+        );
+        meta.addPage(
+            "§d§lCRÉDITOS\n\n" +
+            "§0Escrito y diseñado por:\n" +
+            "§5§lDrakesCraft Array Labs\n\n" +
+            "§8Expansión y mantenimiento del Observatorio Coronalis."
         );
         CORONALIS_FIELD_GUIDE.setItemMeta(meta);
     }
