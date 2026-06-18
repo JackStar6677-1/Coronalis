@@ -636,6 +636,14 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
      */
     static void finalizeCorrelation(@Nonnull Location loc, @Nonnull BlockMenu menu, @Nullable Player player) {
         String targetName = getStr(loc, "selected_target");
+
+        // Guardia: sin objetivo fijado no se puede correlacionar — byName devolvería HORSEHEAD como fallback silencioso
+        if (targetName == null || targetName.isBlank() || "Ninguno".equals(targetName)) {
+            if (player != null) player.sendMessage("§5[Coronalis] §cSelecciona un objetivo celeste antes de correlacionar.");
+            Coronalis.log("[Coronalis/Error] finalizeCorrelation sin objetivo en " + fmtLoc(loc));
+            return;
+        }
+
         CelestialTarget target = CelestialTarget.byName(targetName);
 
         // Consumir Celda de Datos
@@ -666,9 +674,13 @@ public class ControlConsole extends SlimefunItem implements InventoryBlock, Ener
         ItemStack output = menu.getItemInSlot(OUTPUT_SLOT);
         if (output == null || output.getType() == Material.AIR) {
             menu.replaceExistingItem(OUTPUT_SLOT, record);
-        } else {
+        } else if (output.getAmount() < output.getMaxStackSize()) {
             output.setAmount(output.getAmount() + 1);
             menu.replaceExistingItem(OUTPUT_SLOT, output);
+        } else {
+            // Slot de salida lleno: cancelar sin consumir la celda ni el progreso
+            if (player != null) player.sendMessage("§5[Coronalis] §cSlot de salida lleno. Recoge el Eco de Fase antes de continuar.");
+            return;
         }
 
         BlockStorage.addBlockInfo(loc, "correlation_progress", "0");
