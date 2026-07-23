@@ -20,7 +20,7 @@
 
 **Coronalis** convierte una base Slimefun en un observatorio de radio interferometría. Construyes radiotelescopios, los conectas con cable coaxial, alimentas la consola con energía nativa o EnergyNet, calibras el array, apuntas a objetivos de cielo profundo y completas programas científicos con recompensas de XP.
 
-La filosofía del plugin es que el observatorio sea una máquina real dentro de Minecraft: no basta con colocar bloques cerca. Hay red, carga energética, módulos, mantenimiento, telemetría, automatización y comandos de diagnóstico.
+La filosofía del plugin es que el observatorio sea una máquina real dentro de Minecraft: no basta con colocar bloques cerca. Hay red, carga energética, módulos, mantenimiento, telemetría, automatización y commands de diagnóstico.
 
 | Sistema | Qué aporta |
 |---|---|
@@ -90,7 +90,7 @@ Los programas funcionan como misiones de observatorio: exigen tamaño de array, 
 
 ### Terminal de Comandos
 
-Coronalis incluye comandos para probar y diagnosticar sin depender siempre de testeo ingame manual.
+Coronalis incluye commands para probar y diagnosticar sin depender siempre de testeo ingame manual.
 
 ```text
 /coronalis help
@@ -114,8 +114,8 @@ Coronalis incluye comandos para probar y diagnosticar sin depender siempre de te
 
 ### Seguridad de Consola
 
-- Consola bloqueable por usuario.
-- Invitaciones a otros jugadores.
+- Consola bloqueable por user.
+- Invitaciones a otros players.
 - Autenticación por contraseña para instalaciones protegidas.
 - Evita el enfoque de multijugador simultáneo global que podría introducir bugs de concurrencia a futuro.
 
@@ -283,7 +283,7 @@ Coronalis/
 
 ---
 
-## Credits
+## Créditos
 
 - Autor: **[JackStar6677](https://github.com/JackStar6677-1)**
 - Issues: [github.com/JackStar6677-1/Coronalis/issues](https://github.com/JackStar6677-1/Coronalis/issues)
