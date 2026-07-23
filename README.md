@@ -295,3 +295,5 @@ Coronalis/
 <p align="center">
   <em>Coronalis Array Labs: cablea el cielo, calibra la fase, escucha el vacío.</em>
 </p>
+
+<!-- Updated for 2026 active baseline maintenance -->
