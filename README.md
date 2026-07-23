@@ -283,7 +283,7 @@ Coronalis/
 
 ---
 
-## Créditos
+## Credits
 
 - Autor: **[JackStar6677](https://github.com/JackStar6677-1)**
 - Issues: [github.com/JackStar6677-1/Coronalis/issues](https://github.com/JackStar6677-1/Coronalis/issues)
