@@ -33,7 +33,7 @@ La filosofía del plugin es que el observatorio sea una máquina real dentro de 
 
 ---
 
-## Características
+## Features
 
 ### Observatorio Cableado
 
@@ -176,7 +176,7 @@ flowchart LR
 
 ---
 
-## Requisitos
+## Prerequisites
 
 | Dependencia | Versión |
 |---|---|
@@ -187,7 +187,7 @@ flowchart LR
 
 ---
 
-## Instalación
+## Installation
 
 1. Compila o descarga `Coronalis.jar`.
 2. Coloca el JAR en `plugins/` junto a Slimefun y Dough.
@@ -197,7 +197,7 @@ flowchart LR
 
 ---
 
-## Configuración
+## Configuration
 
 Fragmento relevante:
 
